@@ -1,0 +1,2 @@
+Our notepad can be seen in Figure 4-1. The text displayed in the widgets shows that
+the QLineEdit widget can support different fonts, colors, and text sizes.
