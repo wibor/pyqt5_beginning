@@ -3,11 +3,12 @@ import sys
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QHBoxLayout, QCheckBox, QButtonGroup, QVBoxLayout, \
     QPushButton
-
+from PyQt5.QtCore import Qt
 
 class Survey(QWidget):
     def __init__(self):
         super().__init__()
+        self.select = 'nothing'
         self.Gui()
 
     def Gui(self):
@@ -22,6 +23,7 @@ class Survey(QWidget):
         title = QLabel("Movie score")
         title.setFont(font)
         question = QLabel("How would you rate our service today?")
+        question.setAlignment(Qt.AlignCenter)
 
         # Create horizontal layouts
         title_h_box = QHBoxLayout()
