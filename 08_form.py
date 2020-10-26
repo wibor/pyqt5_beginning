@@ -50,6 +50,7 @@ class AppForm(QWidget):
         minutes.addItems([":00", ":15", ":30", ":45"])
 
         submit = QPushButton('Submit Appointment')
+        submit.setToolTip("Click this to close app");
         submit.clicked.connect(self.close)
 
         # Create horizontal layout and add age, height, and weight to h_box
