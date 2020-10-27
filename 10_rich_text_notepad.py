@@ -25,6 +25,7 @@ class Notepad(QMainWindow):
         self.setStatusBar(QStatusBar())
 
     def notepadMenu(self):
+        # x -> as separator
         menus = {'File':'New x Open Save Exit',
                  'Edit':'Undo Redo Cut Copy Paste x Find',
                  'Tools':'Font Color x Highlight',
