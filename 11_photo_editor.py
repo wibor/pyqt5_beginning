@@ -1,9 +1,10 @@
 import sys
 
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtCore import QSize, Qt, QRect
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QTransform
+from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
 from PyQt5.QtWidgets import QMainWindow, QApplication, QTextEdit, QAction, QStatusBar, QToolBar, QDockWidget, \
-    QDesktopWidget, QWidget, QPushButton, QVBoxLayout, QLabel, QSizePolicy
+    QDesktopWidget, QWidget, QPushButton, QVBoxLayout, QLabel, QSizePolicy, QFileDialog, QMessageBox
 
 
 class PhotoEditor(QMainWindow):
@@ -17,7 +18,7 @@ class PhotoEditor(QMainWindow):
         self.setWindowTitle('Photo Editor')
         #self.setCentralWidget(QTextEdit())
         self.centerMainWindow()
-
+        self.dock = QDockWidget()
         self.toggle_dock_tools_act = None
         self.createMenu()
         self.createToolBar()
@@ -91,7 +92,6 @@ class PhotoEditor(QMainWindow):
         # Create edit menu and add actions
         edit_menu = menu_bar.addMenu('Edit')
 
-        self.setStatusBar(QStatusBar(self))
         edit_menu.addAction(self.rotate90_act)
         edit_menu.addAction(self.flip_hor_act)
         edit_menu.addAction(self.flip_ver_act)
@@ -100,15 +100,16 @@ class PhotoEditor(QMainWindow):
 
         # Create view menu and add actions
         view_menu = menu_bar.addMenu('View')
-        self.dock = QDockWidget()
+        self.toggle_dock_tools_act = QAction('Toggle View', self)
         self.toggle_dock_tools_act = self.dock.toggleViewAction()
         view_menu.addAction(self.toggle_dock_tools_act)
 
         self.setStatusBar(QStatusBar(self))
 
+
     def createToolsDockWidget(self):
         # Use View -> Edit Image Tools menu and click the dock widget on or off.
-        self.dock = QDockWidget()
+
         self.dock.setWindowTitle('Dock')
         #dock.setAllowedAreas(Qt.AllDockWidgetAreas)
         self.dock.setAllowedAreas(Qt.LeftDockWidgetArea|Qt.RightDockWidgetArea)
@@ -165,13 +166,59 @@ class PhotoEditor(QMainWindow):
         self.setCentralWidget(self.image_label)
 
     def openImage(self):
-        pass
+        image_file, _ = QFileDialog.getOpenFileName(self,
+                                                    caption="Open File",
+                                                    directory='',
+        filter="JPG Files (*.jpeg *.jpg );;PNG Files (*.png);;Bitmap Files (*.bmp);;GIF Files (*.gif)")
+        if image_file:
+            self.image = QPixmap(image_file)
+            self.image_label.setPixmap(self.image.scaled(self.image_label. size(),Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.print_act.setEnabled(True)
+        else:
+            QMessageBox.information(self, "Error", "Unable to open image.", QMessageBox.Ok)
+
     def saveImage(self):
-        pass
+        image_file, _ = QFileDialog.getOpenFileName(self,
+                                                    caption="Save Image File",
+                                                    directory='',
+        filter="PNG Files (*.png);;JPG Files (*.jpeg *.jpg );;Bitmap Files (*.bmp);;GIF Files (*.gif)")
+        if image_file and self.image.isNull()==False:
+            self.image.save(image_file)
+        else:
+            QMessageBox.information(self, "Error", "Unable to save image.", QMessageBox.Ok)
+
     def printImage(self):
-        pass
+        printer = QPrinter()
+        printer.setOutputFormat(QPrinter.NativeFormat) # QPrinter.NativeFormat is the default
+
+        print_dialog = QPrintDialog(printer)
+        # If the dialog is accepted by the user, begin printing
+        if print_dialog.exec_() == QPrintDialog.Accepted:
+            # Use QPainter to output a PDF file
+            painter = QPainter()
+            painter.begin(printer)
+            rect = QRect(painter.viewport())
+            size = QSize(self.image_label.pixmap().size())
+            size.scale(rect.size(), Qt.KeepAspectRatio)
+            painter.setViewport(rect.x(), rect.y(), size.width(), size. height())
+            painter.setWindow(self.image_label.pixmap().rect())
+            # Scale the image_label to fit the rect source (0, 0)
+            painter.drawPixmap(0, 0, self.image_label.pixmap())
+            painter.end()
+
     def rotateImage(self):
-        pass
+        if self.image.isNull() == False:
+            transform = QTransform().rotate(90)
+            rotated = self.image.transformed(transform,
+                                             mode=Qt.SmoothTransformation)
+            self.image = rotated
+            self.image_label.setPixmap(self.image.scaled(self.image_label.size(),
+                                                         Qt.KeepAspectRatio,
+                                                         Qt.SmoothTransformation))
+            self.image_label.repaint()
+        else:
+            pass
+
     def flipHorImage(self):
         pass
     def flipVerImage(self):
