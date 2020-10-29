@@ -50,6 +50,17 @@ class AppForm(QWidget):
         minutes.addItems([":00", ":15", ":30", ":45"])
 
         submit = QPushButton('Submit Appointment')
+        # CSS
+        submit.setStyleSheet("""
+            background-color: skyblue;
+            color: white;
+            border-style: outset;
+            border-width: 3px;
+            border-radius: 5px;
+            border-color: black;
+            font: bold 16px 'Times New Roman';
+            qproperty-alignment: AlignCenter
+        """)
         submit.setToolTip("Click this to close app");
         submit.clicked.connect(self.close)
 
